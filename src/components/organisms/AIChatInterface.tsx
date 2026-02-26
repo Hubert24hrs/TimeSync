@@ -28,7 +28,7 @@ function ThinkingIndicator() {
                             entering={FadeIn.delay(i * 200).duration(400)}
                             style={styles.dot}
                         >
-                            <View style={[styles.dotInner, { animationDelay: `${i * 200}ms` }]} />
+                            <View style={[styles.dotInner]} />
                         </Animated.View>
                     ))}
                 </View>

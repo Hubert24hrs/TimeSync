@@ -18,7 +18,7 @@ export function GradientBackground({ children, colorOverride, style }: GradientB
 
     return (
         <LinearGradient
-            colors={gradientColors as unknown as string[]}
+            colors={gradientColors as [string, string, string]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={[styles.container, style]}

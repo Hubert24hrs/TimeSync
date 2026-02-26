@@ -64,7 +64,7 @@ export default function SettingsScreen() {
                             </View>
                             <Switch
                                 value={settings.notificationsEnabled}
-                                onValueChange={(v) => dispatch(setNotifications(v))}
+                                onValueChange={(v) => { dispatch(setNotifications(v)); }}
                                 trackColor={{ false: colors.dark.surface, true: colors.primary.main + '60' }}
                                 thumbColor={settings.notificationsEnabled ? colors.primary.main : colors.glass.textMuted}
                             />
@@ -81,7 +81,7 @@ export default function SettingsScreen() {
                             </View>
                             <Switch
                                 value={settings.biometricsEnabled}
-                                onValueChange={(v) => dispatch(setBiometrics(v))}
+                                onValueChange={(v) => { dispatch(setBiometrics(v)); }}
                                 trackColor={{ false: colors.dark.surface, true: colors.secondary.main + '60' }}
                                 thumbColor={settings.biometricsEnabled ? colors.secondary.main : colors.glass.textMuted}
                             />

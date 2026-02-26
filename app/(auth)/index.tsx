@@ -98,15 +98,20 @@ export default function SplashScreen() {
         opacity: glowOpacity.value,
     }));
 
-    const makeRingStyle = (scaleVal: Animated.SharedValue<number>, opacityVal: Animated.SharedValue<number>) =>
-        useAnimatedStyle(() => ({
-            transform: [{ scale: scaleVal.value }],
-            opacity: opacityVal.value,
-        }));
+    const ring1Style = useAnimatedStyle(() => ({
+        transform: [{ scale: ring1Scale.value }],
+        opacity: ring1Opacity.value,
+    }));
 
-    const ring1Style = makeRingStyle(ring1Scale, ring1Opacity);
-    const ring2Style = makeRingStyle(ring2Scale, ring2Opacity);
-    const ring3Style = makeRingStyle(ring3Scale, ring3Opacity);
+    const ring2Style = useAnimatedStyle(() => ({
+        transform: [{ scale: ring2Scale.value }],
+        opacity: ring2Opacity.value,
+    }));
+
+    const ring3Style = useAnimatedStyle(() => ({
+        transform: [{ scale: ring3Scale.value }],
+        opacity: ring3Opacity.value,
+    }));
 
     return (
         <LinearGradient

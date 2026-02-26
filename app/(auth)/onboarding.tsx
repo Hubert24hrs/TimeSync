@@ -65,7 +65,7 @@ export default function OnboardingScreen() {
                 {onboardingSlides.map((slide, index) => (
                     <View key={slide.id} style={styles.slide}>
                         <LinearGradient
-                            colors={slide.gradient as unknown as string[]}
+                            colors={slide.gradient as [string, string]}
                             style={styles.iconBg}
                         >
                             <Text style={styles.slideIcon}>{slide.icon}</Text>

@@ -36,7 +36,7 @@ export function TeamMemberAvatar({ member, size = 56, showTime = true, onPress }
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={ringColors as unknown as string[]}
+                colors={ringColors as [string, string]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[styles.ring, { width: size, height: size, borderRadius: size / 2 }]}
