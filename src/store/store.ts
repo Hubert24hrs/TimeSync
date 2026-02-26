@@ -11,6 +11,7 @@ import aiReducer from './slices/aiSlice';
 import subscriptionReducer from './slices/subscriptionSlice';
 import adsReducer from './slices/adsSlice';
 import referralReducer from './slices/referralSlice';
+import notificationReducer from './slices/notificationSlice';
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
     subscription: subscriptionReducer,
     ads: adsReducer,
     referral: referralReducer,
+    notifications: notificationReducer,
 });
 
 const persistConfig = {

@@ -57,6 +57,8 @@ export default function RootLayout() {
                             <Stack.Screen name="meeting-optimizer" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
                             <Stack.Screen name="paywall" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
                             <Stack.Screen name="referral" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+                            <Stack.Screen name="focus-mode" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+                            <Stack.Screen name="app-lock" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
                         </Stack>
                         <ConsentModal />
                     </ThemeProvider>

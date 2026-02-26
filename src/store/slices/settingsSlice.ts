@@ -7,6 +7,10 @@ interface SettingsState {
     notificationsEnabled: boolean;
     biometricsEnabled: boolean;
     calendarIntegrations: { provider: string; connected: boolean }[];
+    // Security
+    appLockEnabled: boolean;
+    autoLockTimeout: number; // minutes: 0 = never, 1, 5, 15
+    pinCodeHash: string | null;
 }
 
 const initialState: SettingsState = {
@@ -19,6 +23,9 @@ const initialState: SettingsState = {
         { provider: 'Outlook', connected: false },
         { provider: 'Apple Calendar', connected: false },
     ],
+    appLockEnabled: false,
+    autoLockTimeout: 5,
+    pinCodeHash: null,
 };
 
 const settingsSlice = createSlice({
@@ -41,8 +48,26 @@ const settingsSlice = createSlice({
             const integration = state.calendarIntegrations.find((i) => i.provider === action.payload);
             if (integration) integration.connected = !integration.connected;
         },
+        setAppLockEnabled: (state, action: PayloadAction<boolean>) => {
+            state.appLockEnabled = action.payload;
+        },
+        setAutoLockTimeout: (state, action: PayloadAction<number>) => {
+            state.autoLockTimeout = action.payload;
+        },
+        setPinCodeHash: (state, action: PayloadAction<string | null>) => {
+            state.pinCodeHash = action.payload;
+        },
     },
 });
 
-export const { setTheme, setLanguage, setNotifications, setBiometrics, toggleCalendarIntegration } = settingsSlice.actions;
+export const {
+    setTheme,
+    setLanguage,
+    setNotifications,
+    setBiometrics,
+    toggleCalendarIntegration,
+    setAppLockEnabled,
+    setAutoLockTimeout,
+    setPinCodeHash,
+} = settingsSlice.actions;
 export default settingsSlice.reducer;

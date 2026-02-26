@@ -1,43 +1,91 @@
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, ScrollView, Pressable } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { router } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../src/store/store';
-import { GradientBackground } from '../../src/components/atoms/GradientBackground';
+import { dismissNotification } from '../../src/store/slices/notificationSlice';
+import { BreathingGradient } from '../../src/components/atoms/BreathingGradient';
 import { HolographicCard } from '../../src/components/atoms/HolographicCard';
 import { AnimatedText } from '../../src/components/atoms/AnimatedText';
 import { GlassButton } from '../../src/components/atoms/GlassButton';
+import { FloatingParticles } from '../../src/components/atoms/FloatingParticles';
+import { GlowingOrb } from '../../src/components/atoms/GlowingOrb';
 import { EnergyMeter } from '../../src/components/molecules/EnergyMeter';
 import { MeetingCard } from '../../src/components/molecules/MeetingCard';
 import { ScheduleSuggestionCard } from '../../src/components/molecules/ScheduleSuggestionCard';
+import { FloatingActionButton } from '../../src/components/molecules/FloatingActionButton';
+import { SmartNotificationCard } from '../../src/components/molecules/SmartNotificationCard';
+import { AdBanner } from '../../src/components/atoms/AdBanner';
 import { useCurrentDate } from '../../src/hooks/useLiveClock';
 import { useAnimatedEntry } from '../../src/hooks/useAnimatedEntry';
 import { calendarEvents, scheduleSuggestions, currentUser } from '../../src/constants/mockData';
 import { colors } from '../../src/theme/colors';
 import { fontFamilies, fontSizes } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme/spacing';
-import { setEvents } from '../../src/store/slices/calendarSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AdBanner } from '../../src/components/atoms/AdBanner';
 
 export default function HomeScreen() {
     const dispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.auth);
     const energy = useSelector((state: RootState) => state.energy);
+    const notifications = useSelector((state: RootState) => state.notifications);
     const { dayName, monthDay } = useCurrentDate();
 
     const displayName = user?.name?.split(' ')[0] || currentUser.name.split(' ')[0];
     const todayEvents = calendarEvents.slice(0, 4);
     const topSuggestions = scheduleSuggestions.slice(0, 3);
+    const activeNotifications = notifications.items.filter((n) => !n.read).slice(0, 2);
 
     const entry0 = useAnimatedEntry(0);
     const entry1 = useAnimatedEntry(1);
     const entry2 = useAnimatedEntry(2);
     const entry3 = useAnimatedEntry(3);
+    const entry4 = useAnimatedEntry(4);
+
+    const fabActions = [
+        {
+            id: 'focus',
+            icon: '🧠',
+            label: 'Focus Mode',
+            color: colors.primary.main,
+            onPress: () => router.push('/focus-mode'),
+        },
+        {
+            id: 'ai-chat',
+            icon: '🤖',
+            label: 'AI Schedule',
+            color: colors.secondary.main,
+            onPress: () => router.push('/(tabs)/schedule'),
+        },
+        {
+            id: 'meeting',
+            icon: '📅',
+            label: 'Optimize',
+            color: colors.accent.yellow,
+            onPress: () => router.push('/meeting-optimizer'),
+        },
+    ];
 
     return (
-        <GradientBackground>
+        <BreathingGradient>
+            {/* Floating background particles */}
+            <FloatingParticles count={6} />
+
+            {/* Ambient glow orbs */}
+            <GlowingOrb
+                color={colors.primary.main}
+                size={250}
+                intensity={0.08}
+                style={{ top: 60, right: -80 }}
+            />
+            <GlowingOrb
+                color={colors.secondary.main}
+                size={180}
+                intensity={0.06}
+                style={{ top: 400, left: -60 }}
+            />
+
             <SafeAreaView style={styles.container} edges={['top']}>
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                     {/* Header */}
@@ -49,11 +97,35 @@ export default function HomeScreen() {
                         <View style={styles.dateContainer}>
                             <Text style={styles.dayName}>{dayName}</Text>
                             <Text style={styles.dateText}>{monthDay}</Text>
+                            {notifications.unreadCount > 0 && (
+                                <View style={styles.notifBadge}>
+                                    <Text style={styles.notifBadgeText}>{notifications.unreadCount}</Text>
+                                </View>
+                            )}
                         </View>
                     </Animated.View>
 
+                    {/* Smart Notifications */}
+                    {activeNotifications.length > 0 && (
+                        <Animated.View style={entry1}>
+                            {activeNotifications.map((notif, i) => (
+                                <SmartNotificationCard
+                                    key={notif.id}
+                                    notification={{
+                                        ...notif,
+                                        onAction: notif.actionLabel
+                                            ? () => router.push('/focus-mode')
+                                            : undefined,
+                                    }}
+                                    index={i}
+                                    onDismiss={() => dispatch(dismissNotification(notif.id))}
+                                />
+                            ))}
+                        </Animated.View>
+                    )}
+
                     {/* Energy Forecast Card */}
-                    <Animated.View style={entry1}>
+                    <Animated.View style={entry2}>
                         <HolographicCard glowColor={colors.energy.peak} style={styles.energyCard}>
                             <View style={styles.energyRow}>
                                 <View style={styles.energyInfo}>
@@ -74,7 +146,7 @@ export default function HomeScreen() {
                     </Animated.View>
 
                     {/* Today's Schedule */}
-                    <Animated.View style={entry2}>
+                    <Animated.View style={entry3}>
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Today's Schedule</Text>
                             <Text style={styles.sectionCount}>{todayEvents.length} meetings</Text>
@@ -85,7 +157,7 @@ export default function HomeScreen() {
                     </Animated.View>
 
                     {/* AI Suggestions */}
-                    <Animated.View style={entry3}>
+                    <Animated.View style={entry4}>
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Smart Suggestions</Text>
                             <Text style={styles.sectionSubtext}>AI-optimized slots</Text>
@@ -117,7 +189,10 @@ export default function HomeScreen() {
                     <View style={styles.bottomSpacer} />
                 </ScrollView>
             </SafeAreaView>
-        </GradientBackground>
+
+            {/* Floating Action Button */}
+            <FloatingActionButton actions={fabActions} />
+        </BreathingGradient>
     );
 }
 
@@ -130,6 +205,16 @@ const styles = StyleSheet.create({
     dateContainer: { alignItems: 'flex-end' },
     dayName: { fontFamily: fontFamilies.primarySemiBold, fontSize: fontSizes.md, color: colors.primary.light },
     dateText: { fontFamily: fontFamilies.primary, fontSize: fontSizes.sm, color: colors.glass.textMuted },
+    notifBadge: {
+        backgroundColor: colors.status.error,
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 4,
+    },
+    notifBadgeText: { fontFamily: fontFamilies.primaryBold, fontSize: 10, color: '#FFF' },
     energyCard: { marginBottom: spacing.xl },
     energyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     energyInfo: { flex: 1, marginRight: spacing.lg },
