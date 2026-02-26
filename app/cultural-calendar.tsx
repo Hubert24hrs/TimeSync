@@ -8,6 +8,7 @@ import { culturalHolidays } from '../src/constants/mockData';
 import { colors } from '../src/theme/colors';
 import { fontFamilies, fontSizes } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme/spacing';
+import { FeatureGate } from '../src/components/atoms/FeatureGate';
 
 const filters = ['All', 'Religious', 'Cultural', 'Major', 'Minor'];
 
@@ -24,58 +25,60 @@ export default function CulturalCalendarScreen() {
     });
 
     return (
-        <GradientBackground>
-            <SafeAreaView style={styles.container} edges={['top']}>
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <Pressable onPress={() => router.back()} hitSlop={12}>
-                            <Text style={styles.backButton}>← Back</Text>
-                        </Pressable>
-                        <Text style={styles.title}>Cultural Calendar</Text>
-                        <View style={{ width: 60 }} />
-                    </View>
-
-                    <Text style={styles.subtitle}>{culturalHolidays.length} holidays from around the world</Text>
-
-                    {/* Filters */}
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersRow}>
-                        {filters.map((f) => (
-                            <Pressable key={f} onPress={() => setActiveFilter(f)}>
-                                <View style={[styles.filterChip, activeFilter === f && styles.filterChipActive]}>
-                                    <Text style={[styles.filterText, activeFilter === f && styles.filterTextActive]}>{f}</Text>
-                                </View>
+        <FeatureGate feature="cultural_calendar">
+            <GradientBackground>
+                <SafeAreaView style={styles.container} edges={['top']}>
+                    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                        {/* Header */}
+                        <View style={styles.header}>
+                            <Pressable onPress={() => router.back()} hitSlop={12}>
+                                <Text style={styles.backButton}>← Back</Text>
                             </Pressable>
+                            <Text style={styles.title}>Cultural Calendar</Text>
+                            <View style={{ width: 60 }} />
+                        </View>
+
+                        <Text style={styles.subtitle}>{culturalHolidays.length} holidays from around the world</Text>
+
+                        {/* Filters */}
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersRow}>
+                            {filters.map((f) => (
+                                <Pressable key={f} onPress={() => setActiveFilter(f)}>
+                                    <View style={[styles.filterChip, activeFilter === f && styles.filterChipActive]}>
+                                        <Text style={[styles.filterText, activeFilter === f && styles.filterTextActive]}>{f}</Text>
+                                    </View>
+                                </Pressable>
+                            ))}
+                        </ScrollView>
+
+                        {/* Holidays List */}
+                        {filteredHolidays.map((holiday) => (
+                            <HolographicCard key={holiday.id} style={styles.holidayCard}>
+                                <View style={styles.holidayHeader}>
+                                    <Text style={styles.holidayEmoji}>{holiday.emoji || '📅'}</Text>
+                                    <View style={styles.holidayInfo}>
+                                        <Text style={styles.holidayName}>{holiday.name}</Text>
+                                        <Text style={styles.holidayDate}>
+                                            {new Date(holiday.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                        </Text>
+                                    </View>
+                                    <View style={[styles.levelBadge, holiday.observanceLevel === 'major' ? styles.majorBadge : styles.minorBadge]}>
+                                        <Text style={styles.levelText}>{holiday.observanceLevel}</Text>
+                                    </View>
+                                </View>
+                                <Text style={styles.holidayCountry}>{holiday.country}</Text>
+                                {holiday.religion && (
+                                    <Text style={styles.holidayReligion}>{holiday.religion}</Text>
+                                )}
+                                <Text style={styles.holidayDescription}>{holiday.description}</Text>
+                            </HolographicCard>
                         ))}
+
+                        <View style={{ height: spacing.huge }} />
                     </ScrollView>
-
-                    {/* Holidays List */}
-                    {filteredHolidays.map((holiday) => (
-                        <HolographicCard key={holiday.id} style={styles.holidayCard}>
-                            <View style={styles.holidayHeader}>
-                                <Text style={styles.holidayEmoji}>{holiday.emoji || '📅'}</Text>
-                                <View style={styles.holidayInfo}>
-                                    <Text style={styles.holidayName}>{holiday.name}</Text>
-                                    <Text style={styles.holidayDate}>
-                                        {new Date(holiday.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                                    </Text>
-                                </View>
-                                <View style={[styles.levelBadge, holiday.observanceLevel === 'major' ? styles.majorBadge : styles.minorBadge]}>
-                                    <Text style={styles.levelText}>{holiday.observanceLevel}</Text>
-                                </View>
-                            </View>
-                            <Text style={styles.holidayCountry}>{holiday.country}</Text>
-                            {holiday.religion && (
-                                <Text style={styles.holidayReligion}>{holiday.religion}</Text>
-                            )}
-                            <Text style={styles.holidayDescription}>{holiday.description}</Text>
-                        </HolographicCard>
-                    ))}
-
-                    <View style={{ height: spacing.huge }} />
-                </ScrollView>
-            </SafeAreaView>
-        </GradientBackground>
+                </SafeAreaView>
+            </GradientBackground>
+        </FeatureGate>
     );
 }
 

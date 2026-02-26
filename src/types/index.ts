@@ -4,6 +4,55 @@ export type MemberStatus = 'online' | 'offline' | 'busy' | 'away';
 export type EnergySource = 'manual' | 'predicted' | 'wearable';
 export type ViewMode = 'day' | 'week' | 'month';
 
+// Monetization types
+export type SubscriptionTier = 'free' | 'pro' | 'teams';
+export type BillingPeriod = 'monthly' | 'annual' | 'lifetime';
+export type SubscriptionStatus = 'active' | 'trialing' | 'expired' | 'cancelled' | 'paused';
+
+export interface SubscriptionPlan {
+    id: string;
+    tier: SubscriptionTier;
+    period: BillingPeriod;
+    price: number;
+    currency: string;
+    trialDays: number;
+    features: string[];
+    badge?: string;
+    popular?: boolean;
+}
+
+export interface Entitlement {
+    id: string;
+    isActive: boolean;
+    expiresAt: string | null;
+    productId: string;
+    store: 'apple' | 'google' | 'stripe' | 'promotional';
+}
+
+export interface ReferralInfo {
+    code: string;
+    referrerId: string;
+    totalReferrals: number;
+    pendingRewards: number;
+    claimedRewards: number;
+}
+
+export interface AdConfig {
+    bannerEnabled: boolean;
+    interstitialEnabled: boolean;
+    rewardedEnabled: boolean;
+    interstitialFrequency: number;
+    bannerUnitId: string;
+    interstitialUnitId: string;
+    rewardedUnitId: string;
+}
+
+export interface AnalyticsEvent {
+    name: string;
+    params: Record<string, string | number | boolean>;
+    timestamp: string;
+}
+
 export interface User {
     id: string;
     name: string;

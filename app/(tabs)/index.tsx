@@ -19,6 +19,7 @@ import { fontFamilies, fontSizes } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme/spacing';
 import { setEvents } from '../../src/store/slices/calendarSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AdBanner } from '../../src/components/atoms/AdBanner';
 
 export default function HomeScreen() {
     const dispatch = useDispatch();
@@ -109,6 +110,9 @@ export default function HomeScreen() {
                         <GlassButton title="🤖 AI Schedule" onPress={() => router.push('/(tabs)/schedule')} variant="primary" size="md" />
                         <GlassButton title="🌍 Team Globe" onPress={() => router.push('/(tabs)/team')} variant="secondary" size="md" />
                     </View>
+
+                    {/* Ad Banner for free users */}
+                    <AdBanner />
 
                     <View style={styles.bottomSpacer} />
                 </ScrollView>

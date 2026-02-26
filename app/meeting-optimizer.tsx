@@ -10,103 +10,106 @@ import { scheduleSuggestions, calendarEvents } from '../src/constants/mockData';
 import { colors } from '../src/theme/colors';
 import { fontFamilies, fontSizes } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme/spacing';
+import { FeatureGate } from '../src/components/atoms/FeatureGate';
 
 export default function MeetingOptimizerScreen() {
     const conflictEvents = calendarEvents.slice(0, 2);
 
     return (
-        <GradientBackground>
-            <SafeAreaView style={styles.container} edges={['top']}>
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <Pressable onPress={() => router.back()} hitSlop={12}>
-                            <Text style={styles.backButton}>← Back</Text>
-                        </Pressable>
-                        <Text style={styles.title}>Meeting Optimizer</Text>
-                        <View style={{ width: 60 }} />
-                    </View>
-
-                    {/* Conflict Alert */}
-                    <HolographicCard glowColor={colors.status.warning} style={styles.conflictCard}>
-                        <View style={styles.conflictHeader}>
-                            <Text style={styles.conflictEmoji}>⚠️</Text>
-                            <Text style={styles.conflictTitle}>Scheduling Conflict Detected</Text>
+        <FeatureGate feature="meeting_optimizer">
+            <GradientBackground>
+                <SafeAreaView style={styles.container} edges={['top']}>
+                    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                        {/* Header */}
+                        <View style={styles.header}>
+                            <Pressable onPress={() => router.back()} hitSlop={12}>
+                                <Text style={styles.backButton}>← Back</Text>
+                            </Pressable>
+                            <Text style={styles.title}>Meeting Optimizer</Text>
+                            <View style={{ width: 60 }} />
                         </View>
-                        <Text style={styles.conflictDesc}>
-                            "{conflictEvents[0]?.title}" and "{conflictEvents[1]?.title}" have overlapping time slots
-                        </Text>
-                        <View style={styles.conflictEvents}>
-                            {conflictEvents.map((evt) => (
-                                <View key={evt.id} style={styles.conflictEvent}>
-                                    <View style={[styles.conflictDot, { backgroundColor: evt.color || colors.primary.main }]} />
-                                    <View>
-                                        <Text style={styles.conflictEventTitle}>{evt.title}</Text>
-                                        <Text style={styles.conflictEventTime}>
-                                            {new Date(evt.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} - {new Date(evt.endTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                                        </Text>
+
+                        {/* Conflict Alert */}
+                        <HolographicCard glowColor={colors.status.warning} style={styles.conflictCard}>
+                            <View style={styles.conflictHeader}>
+                                <Text style={styles.conflictEmoji}>⚠️</Text>
+                                <Text style={styles.conflictTitle}>Scheduling Conflict Detected</Text>
+                            </View>
+                            <Text style={styles.conflictDesc}>
+                                "{conflictEvents[0]?.title}" and "{conflictEvents[1]?.title}" have overlapping time slots
+                            </Text>
+                            <View style={styles.conflictEvents}>
+                                {conflictEvents.map((evt) => (
+                                    <View key={evt.id} style={styles.conflictEvent}>
+                                        <View style={[styles.conflictDot, { backgroundColor: evt.color || colors.primary.main }]} />
+                                        <View>
+                                            <Text style={styles.conflictEventTitle}>{evt.title}</Text>
+                                            <Text style={styles.conflictEventTime}>
+                                                {new Date(evt.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} - {new Date(evt.endTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                                            </Text>
+                                        </View>
                                     </View>
-                                </View>
-                            ))}
-                        </View>
-                    </HolographicCard>
+                                ))}
+                            </View>
+                        </HolographicCard>
 
-                    {/* AI Suggestions */}
-                    <Text style={styles.sectionTitle}>AI-Ranked Alternatives</Text>
-                    <Text style={styles.sectionSubtitle}>Optimized for fairness, energy, and timezone balance</Text>
+                        {/* AI Suggestions */}
+                        <Text style={styles.sectionTitle}>AI-Ranked Alternatives</Text>
+                        <Text style={styles.sectionSubtitle}>Optimized for fairness, energy, and timezone balance</Text>
 
-                    {scheduleSuggestions.map((sug, i) => (
-                        <View key={sug.id}>
-                            {i === 0 && (
-                                <View style={styles.bestBadge}>
-                                    <Text style={styles.bestBadgeText}>🏆 Best Match</Text>
+                        {scheduleSuggestions.map((sug, i) => (
+                            <View key={sug.id}>
+                                {i === 0 && (
+                                    <View style={styles.bestBadge}>
+                                        <Text style={styles.bestBadgeText}>🏆 Best Match</Text>
+                                    </View>
+                                )}
+                                <ScheduleSuggestionCard
+                                    suggestion={sug}
+                                    onAccept={() => { }}
+                                    onReject={() => { }}
+                                />
+                            </View>
+                        ))}
+
+                        {/* Fairness Metrics */}
+                        <Text style={styles.sectionTitle}>Fairness Analytics</Text>
+                        <HolographicCard glowColor={colors.secondary.main}>
+                            <View style={styles.metricsGrid}>
+                                <View style={styles.metric}>
+                                    <Text style={styles.metricValue}>92%</Text>
+                                    <Text style={styles.metricLabel}>Timezone Fairness</Text>
                                 </View>
-                            )}
-                            <ScheduleSuggestionCard
-                                suggestion={sug}
-                                onAccept={() => { }}
-                                onReject={() => { }}
+                                <View style={styles.metric}>
+                                    <Text style={styles.metricValue}>87%</Text>
+                                    <Text style={styles.metricLabel}>Energy Alignment</Text>
+                                </View>
+                                <View style={styles.metric}>
+                                    <Text style={styles.metricValue}>3/8</Text>
+                                    <Text style={styles.metricLabel}>Off-hours Members</Text>
+                                </View>
+                                <View style={styles.metric}>
+                                    <Text style={styles.metricValue}>Low</Text>
+                                    <Text style={styles.metricLabel}>Cultural Conflict</Text>
+                                </View>
+                            </View>
+                        </HolographicCard>
+
+                        <View style={styles.ctaContainer}>
+                            <GlassButton
+                                title="Apply Optimal Time ✨"
+                                onPress={() => router.back()}
+                                variant="primary"
+                                size="lg"
+                                fullWidth
                             />
                         </View>
-                    ))}
 
-                    {/* Fairness Metrics */}
-                    <Text style={styles.sectionTitle}>Fairness Analytics</Text>
-                    <HolographicCard glowColor={colors.secondary.main}>
-                        <View style={styles.metricsGrid}>
-                            <View style={styles.metric}>
-                                <Text style={styles.metricValue}>92%</Text>
-                                <Text style={styles.metricLabel}>Timezone Fairness</Text>
-                            </View>
-                            <View style={styles.metric}>
-                                <Text style={styles.metricValue}>87%</Text>
-                                <Text style={styles.metricLabel}>Energy Alignment</Text>
-                            </View>
-                            <View style={styles.metric}>
-                                <Text style={styles.metricValue}>3/8</Text>
-                                <Text style={styles.metricLabel}>Off-hours Members</Text>
-                            </View>
-                            <View style={styles.metric}>
-                                <Text style={styles.metricValue}>Low</Text>
-                                <Text style={styles.metricLabel}>Cultural Conflict</Text>
-                            </View>
-                        </View>
-                    </HolographicCard>
-
-                    <View style={styles.ctaContainer}>
-                        <GlassButton
-                            title="Apply Optimal Time ✨"
-                            onPress={() => router.back()}
-                            variant="primary"
-                            size="lg"
-                            fullWidth
-                        />
-                    </View>
-
-                    <View style={{ height: spacing.huge }} />
-                </ScrollView>
-            </SafeAreaView>
-        </GradientBackground>
+                        <View style={{ height: spacing.huge }} />
+                    </ScrollView>
+                </SafeAreaView>
+            </GradientBackground>
+        </FeatureGate>
     );
 }
 

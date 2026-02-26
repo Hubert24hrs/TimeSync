@@ -11,6 +11,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '../src/store/store';
 import { ThemeProvider } from '../src/theme';
 import { colors } from '../src/theme/colors';
+import { ConsentModal } from '../src/components/molecules/ConsentModal';
 
 function LoadingScreen() {
     return (
@@ -54,7 +55,10 @@ export default function RootLayout() {
                             <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
                             <Stack.Screen name="cultural-calendar" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
                             <Stack.Screen name="meeting-optimizer" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+                            <Stack.Screen name="paywall" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+                            <Stack.Screen name="referral" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
                         </Stack>
+                        <ConsentModal />
                     </ThemeProvider>
                 </PersistGate>
             </Provider>

@@ -12,10 +12,13 @@ import { colors } from '../src/theme/colors';
 import { fontFamilies, fontSizes } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme/spacing';
 import { ThemeMode } from '../src/theme';
+import { useSubscription } from '../src/hooks/useSubscription';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SettingsScreen() {
     const dispatch = useDispatch();
     const settings = useSelector((state: RootState) => state.settings);
+    const { tier, isPro, isTrialActive, expiresAt, aiUsageToday, aiDailyLimit } = useSubscription();
 
     const themeOptions: { label: string; value: ThemeMode; emoji: string }[] = [
         { label: 'Dark', value: 'dark', emoji: '🌙' },
@@ -35,6 +38,46 @@ export default function SettingsScreen() {
                         <Text style={styles.title}>Settings</Text>
                         <View style={{ width: 60 }} />
                     </View>
+
+                    {/* Subscription */}
+                    <Text style={styles.sectionTitle}>Subscription</Text>
+                    <Pressable onPress={() => router.push('/paywall')}>
+                        <LinearGradient
+                            colors={isPro
+                                ? [colors.primary.main + '20', colors.secondary.main + '20'] as [string, string]
+                                : [colors.dark.card, colors.dark.elevated] as [string, string]}
+                            style={[styles.subscriptionCard, isPro && styles.subscriptionCardPro]}
+                        >
+                            <View style={styles.settingRow}>
+                                <View>
+                                    <Text style={styles.settingLabel}>
+                                        {isPro ? `⚡ ${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan` : '🔒 Free Plan'}
+                                    </Text>
+                                    <Text style={styles.settingDesc}>
+                                        {isPro
+                                            ? (isTrialActive ? 'Trial active' : 'Premium features unlocked')
+                                            : `${aiUsageToday}/${aiDailyLimit} AI chats used today`}
+                                    </Text>
+                                </View>
+                                <Text style={{ color: colors.primary.light, fontSize: 16 }}>
+                                    {isPro ? 'Manage →' : 'Upgrade →'}
+                                </Text>
+                            </View>
+                        </LinearGradient>
+                    </Pressable>
+
+                    {/* Referral */}
+                    <Pressable onPress={() => router.push('/referral')}>
+                        <HolographicCard style={styles.integrationCard}>
+                            <View style={styles.settingRow}>
+                                <View>
+                                    <Text style={styles.settingLabel}>🎁 Refer & Earn</Text>
+                                    <Text style={styles.settingDesc}>Invite friends, get free Pro access</Text>
+                                </View>
+                                <Text style={{ color: colors.primary.light, fontSize: 16 }}>→</Text>
+                            </View>
+                        </HolographicCard>
+                    </Pressable>
 
                     {/* Appearance */}
                     <Text style={styles.sectionTitle}>Appearance</Text>
@@ -122,6 +165,23 @@ export default function SettingsScreen() {
                         </View>
                     </HolographicCard>
 
+                    {/* Privacy */}
+                    <Text style={styles.sectionTitle}>Privacy</Text>
+                    <HolographicCard>
+                        <Pressable style={styles.aboutRow}>
+                            <Text style={styles.aboutLabel}>Privacy Policy</Text>
+                            <Text style={{ color: colors.primary.light }}>→</Text>
+                        </Pressable>
+                        <Pressable style={styles.aboutRow}>
+                            <Text style={styles.aboutLabel}>Terms of Service</Text>
+                            <Text style={{ color: colors.primary.light }}>→</Text>
+                        </Pressable>
+                        <Pressable style={styles.aboutRow}>
+                            <Text style={styles.aboutLabel}>Manage Data & Consent</Text>
+                            <Text style={{ color: colors.primary.light }}>→</Text>
+                        </Pressable>
+                    </HolographicCard>
+
                     <View style={{ height: spacing.huge }} />
                 </ScrollView>
             </SafeAreaView>
@@ -146,6 +206,8 @@ const styles = StyleSheet.create({
     themeLabel: { fontFamily: fontFamilies.primaryMedium, fontSize: fontSizes.sm, color: colors.glass.textMuted },
     themeLabelActive: { color: colors.primary.light },
     integrationCard: { marginBottom: spacing.sm },
+    subscriptionCard: { borderRadius: borderRadius.xl, padding: spacing.xl, borderWidth: 1.5, borderColor: colors.glass.border, marginBottom: spacing.sm },
+    subscriptionCardPro: { borderColor: colors.primary.main },
     aboutRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.sm },
     aboutLabel: { fontFamily: fontFamilies.primary, fontSize: fontSizes.md, color: colors.glass.textMuted },
     aboutValue: { fontFamily: fontFamilies.mono, fontSize: fontSizes.md, color: '#FFF' },

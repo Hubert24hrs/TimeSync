@@ -8,6 +8,9 @@ import teamReducer from './slices/teamSlice';
 import energyReducer from './slices/energySlice';
 import settingsReducer from './slices/settingsSlice';
 import aiReducer from './slices/aiSlice';
+import subscriptionReducer from './slices/subscriptionSlice';
+import adsReducer from './slices/adsSlice';
+import referralReducer from './slices/referralSlice';
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -16,12 +19,15 @@ const rootReducer = combineReducers({
     energy: energyReducer,
     settings: settingsReducer,
     ai: aiReducer,
+    subscription: subscriptionReducer,
+    ads: adsReducer,
+    referral: referralReducer,
 });
 
 const persistConfig = {
     key: 'timesync-root',
     storage: AsyncStorage,
-    whitelist: ['auth', 'settings'],
+    whitelist: ['auth', 'settings', 'subscription', 'ads', 'referral'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
