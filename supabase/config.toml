@@ -1,0 +1,29 @@
+# Minimal Supabase CLI config. Run `supabase init` to regenerate the full defaults if needed.
+project_id = "timesync"
+
+[auth]
+site_url = "https://timesync.app"
+additional_redirect_urls = ["timesync://auth-callback", "http://localhost:8081"]
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
+
+[auth.external.apple]
+enabled = true
+client_id = "env(SUPABASE_AUTH_APPLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_APPLE_SECRET)"
+
+# Public endpoints: invitees and Slack are not Supabase users.
+[functions.public-booking]
+verify_jwt = false
+
+[functions.manage-booking]
+verify_jwt = false
+
+[functions.slack-command]
+verify_jwt = false
+
+[functions.send-reminders]
+verify_jwt = false

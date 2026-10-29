@@ -4,7 +4,7 @@
 export interface LinkClaims {
     /** Booking id, or event-type id for signed booking links. */
     sub: string;
-    action: 'manage' | 'book';
+    action: 'manage' | 'book' | 'slack_link';
     /** Expiry, epoch seconds. */
     exp: number;
 }
@@ -57,7 +57,7 @@ export async function verifyLink(token: string, secret: string, nowSeconds = Mat
     try {
         const claims = JSON.parse(new TextDecoder().decode(fromBase64Url(payload))) as LinkClaims;
         if (typeof claims.exp !== 'number' || claims.exp < nowSeconds) return null;
-        if (claims.action !== 'manage' && claims.action !== 'book') return null;
+        if (!['manage', 'book', 'slack_link'].includes(claims.action)) return null;
         return claims;
     } catch {
         return null;

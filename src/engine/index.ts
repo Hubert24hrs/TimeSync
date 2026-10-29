@@ -11,3 +11,4 @@ export * from './routing.ts';
 export * from './reminders.ts';
 export * from './analytics.ts';
 export * from './validation.ts';
+export * from './assistant.ts';
