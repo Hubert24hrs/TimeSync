@@ -1,110 +1,72 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { GradientBackground } from '../src/components/atoms/GradientBackground';
-import { HolographicCard } from '../src/components/atoms/HolographicCard';
-import { culturalHolidays } from '../src/constants/mockData';
-import { colors } from '../src/theme/colors';
-import { fontFamilies, fontSizes } from '../src/theme/typography';
-import { spacing, borderRadius } from '../src/theme/spacing';
-import { FeatureGate } from '../src/components/atoms/FeatureGate';
+import { DateTime } from 'luxon';
+import React, { useMemo, useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import { FeatureGate } from '../src/components/Monetization';
+import { holidaysBetween, workweekLabel, type HolidayKind } from '../src/engine';
+import { usePeople } from '../src/hooks/useWorkspace';
+import { spacing } from '../src/theme';
+import { Screen } from '../src/ui/Screen';
+import { Badge, Card, Chip, EmptyState, SectionHeader, Txt } from '../src/ui/primitives';
 
-const filters = ['All', 'Religious', 'Cultural', 'Major', 'Minor'];
+const FILTERS: { key: 'all' | 'team' | HolidayKind; label: string }[] = [
+    { key: 'team', label: 'My team' },
+    { key: 'all', label: 'Worldwide' },
+    { key: 'public', label: 'Public' },
+    { key: 'religious', label: 'Religious' },
+    { key: 'cultural', label: 'Cultural' },
+];
 
-export default function CulturalCalendarScreen() {
-    const [activeFilter, setActiveFilter] = useState('All');
-
-    const filteredHolidays = culturalHolidays.filter((h) => {
-        if (activeFilter === 'All') return true;
-        if (activeFilter === 'Religious') return h.religion && h.religion !== 'Cultural';
-        if (activeFilter === 'Cultural') return h.religion === 'Cultural';
-        if (activeFilter === 'Major') return h.observanceLevel === 'major';
-        if (activeFilter === 'Minor') return h.observanceLevel === 'minor';
-        return true;
-    });
+export default function CulturalCalendar() {
+    const { all } = usePeople();
+    const [filter, setFilter] = useState<(typeof FILTERS)[number]['key']>('team');
+    const countries = useMemo(() => [...new Set(all.map((p) => p.countryCode).filter((c): c is string => !!c))], [all]);
+    const today = DateTime.now();
+    const holidays = useMemo(() => {
+        const list = holidaysBetween(today.toISODate()!, today.plus({ days: 180 }).toISODate()!, filter === 'team' ? countries : undefined);
+        return filter === 'team' || filter === 'all' ? list : list.filter((h) => h.kind === filter);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filter, countries]);
 
     return (
-        <FeatureGate feature="cultural_calendar">
-            <GradientBackground>
-                <SafeAreaView style={styles.container} edges={['top']}>
-                    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                        {/* Header */}
-                        <View style={styles.header}>
-                            <Pressable onPress={() => router.back()} hitSlop={12}>
-                                <Text style={styles.backButton}>← Back</Text>
-                            </Pressable>
-                            <Text style={styles.title}>Cultural Calendar</Text>
-                            <View style={{ width: 60 }} />
+        <Screen title="Cultural calendar" subtitle="Holidays, observances and regional workweeks" back maxWidth={820}>
+            <FeatureGate feature="cultural_calendar">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm, marginBottom: spacing.lg }}>
+                    {FILTERS.map((f) => (
+                        <Chip key={f.key} label={f.label} selected={filter === f.key} onPress={() => setFilter(f.key)} />
+                    ))}
+                </ScrollView>
+
+                <SectionHeader title="Workweeks" style={{ marginTop: 0 }} />
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                    {countries.map((cc) => (
+                        <Badge key={cc} tone={workweekLabel(cc) === 'Mon–Fri' ? 'neutral' : 'accent'} label={`${cc} · ${workweekLabel(cc)}`} />
+                    ))}
+                </View>
+                <Txt variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
+                    The optimizer treats each person’s regional weekend and public holidays as off-days.
+                </Txt>
+
+                <SectionHeader title="Next 6 months" />
+                {holidays.length === 0 ? <EmptyState icon="calendar-outline" title="Nothing coming up" /> : null}
+                {holidays.map((h) => (
+                    <Card key={h.id} style={{ flexDirection: 'row', gap: spacing.md, marginBottom: spacing.sm, alignItems: 'center' }}>
+                        <Txt style={{ fontSize: 28 }}>{h.emoji}</Txt>
+                        <View style={{ flex: 1, gap: 2 }}>
+                            <Txt variant="bodyStrong">{h.name}</Txt>
+                            <Txt variant="mono" tone="secondary">
+                                {DateTime.fromISO(h.date).toFormat('ccc d LLL yyyy')}
+                            </Txt>
+                            <Txt variant="caption" tone="muted" numberOfLines={2}>
+                                {h.description} {h.countries.includes('*') ? 'Worldwide.' : h.countries.join(', ')}
+                            </Txt>
                         </View>
-
-                        <Text style={styles.subtitle}>{culturalHolidays.length} holidays from around the world</Text>
-
-                        {/* Filters */}
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersRow}>
-                            {filters.map((f) => (
-                                <Pressable key={f} onPress={() => setActiveFilter(f)}>
-                                    <View style={[styles.filterChip, activeFilter === f && styles.filterChipActive]}>
-                                        <Text style={[styles.filterText, activeFilter === f && styles.filterTextActive]}>{f}</Text>
-                                    </View>
-                                </Pressable>
-                            ))}
-                        </ScrollView>
-
-                        {/* Holidays List */}
-                        {filteredHolidays.map((holiday) => (
-                            <HolographicCard key={holiday.id} style={styles.holidayCard}>
-                                <View style={styles.holidayHeader}>
-                                    <Text style={styles.holidayEmoji}>{holiday.emoji || '📅'}</Text>
-                                    <View style={styles.holidayInfo}>
-                                        <Text style={styles.holidayName}>{holiday.name}</Text>
-                                        <Text style={styles.holidayDate}>
-                                            {new Date(holiday.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                                        </Text>
-                                    </View>
-                                    <View style={[styles.levelBadge, holiday.observanceLevel === 'major' ? styles.majorBadge : styles.minorBadge]}>
-                                        <Text style={styles.levelText}>{holiday.observanceLevel}</Text>
-                                    </View>
-                                </View>
-                                <Text style={styles.holidayCountry}>{holiday.country}</Text>
-                                {holiday.religion && (
-                                    <Text style={styles.holidayReligion}>{holiday.religion}</Text>
-                                )}
-                                <Text style={styles.holidayDescription}>{holiday.description}</Text>
-                            </HolographicCard>
-                        ))}
-
-                        <View style={{ height: spacing.huge }} />
-                    </ScrollView>
-                </SafeAreaView>
-            </GradientBackground>
-        </FeatureGate>
+                        <View style={{ gap: 4, alignItems: 'flex-end' }}>
+                            <Badge tone={h.level === 'major' ? 'warning' : 'neutral'} label={h.level} />
+                            {h.approximate ? <Badge label="date may vary" /> : null}
+                        </View>
+                    </Card>
+                ))}
+            </FeatureGate>
+        </Screen>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1 },
-    scrollContent: { padding: spacing.lg },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
-    backButton: { fontFamily: fontFamilies.primaryMedium, fontSize: fontSizes.lg, color: colors.primary.light },
-    title: { fontFamily: fontFamilies.displayBold, fontSize: fontSizes.xxl, color: '#FFF' },
-    subtitle: { fontFamily: fontFamilies.primary, fontSize: fontSizes.md, color: colors.glass.textMuted, marginBottom: spacing.lg, textAlign: 'center' },
-    filtersRow: { gap: spacing.sm, paddingBottom: spacing.lg },
-    filterChip: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, borderRadius: borderRadius.pill, borderWidth: 1, borderColor: colors.glass.border, backgroundColor: colors.dark.card },
-    filterChipActive: { borderColor: colors.primary.main, backgroundColor: colors.primary.main + '20' },
-    filterText: { fontFamily: fontFamilies.primaryMedium, fontSize: fontSizes.sm, color: colors.glass.textMuted },
-    filterTextActive: { color: colors.primary.light },
-    holidayCard: { marginBottom: spacing.md },
-    holidayHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm },
-    holidayEmoji: { fontSize: 28 },
-    holidayInfo: { flex: 1 },
-    holidayName: { fontFamily: fontFamilies.primaryBold, fontSize: fontSizes.lg, color: '#FFF' },
-    holidayDate: { fontFamily: fontFamilies.mono, fontSize: fontSizes.sm, color: colors.primary.light },
-    levelBadge: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: borderRadius.sm },
-    majorBadge: { backgroundColor: colors.accent.yellow + '20' },
-    minorBadge: { backgroundColor: colors.glass.white },
-    levelText: { fontFamily: fontFamilies.primaryMedium, fontSize: fontSizes.xs, color: colors.glass.text, textTransform: 'capitalize' },
-    holidayCountry: { fontFamily: fontFamilies.primary, fontSize: fontSizes.sm, color: colors.secondary.main, marginBottom: 4 },
-    holidayReligion: { fontFamily: fontFamilies.primaryMedium, fontSize: fontSizes.xs, color: colors.accent.pink, marginBottom: spacing.xs },
-    holidayDescription: { fontFamily: fontFamilies.primary, fontSize: fontSizes.sm, color: colors.glass.textMuted, lineHeight: 20 },
-});

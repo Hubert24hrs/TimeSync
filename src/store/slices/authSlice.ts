@@ -1,46 +1,37 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User } from '../../types';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+
+// 'demo' runs entirely on-device with the demo workspace; 'cloud' is a signed-in Supabase session.
+export type AuthMode = 'none' | 'demo' | 'cloud';
 
 interface AuthState {
-    user: User | null;
-    isAuthenticated: boolean;
+    mode: AuthMode;
+    userId: string | null;
+    email: string | null;
     isOnboarded: boolean;
-    token: string | null;
-    loading: boolean;
 }
 
-const initialState: AuthState = {
-    user: null,
-    isAuthenticated: false,
-    isOnboarded: false,
-    token: null,
-    loading: false,
-};
+const initialState: AuthState = { mode: 'none', userId: null, email: null, isOnboarded: false };
 
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setUser: (state, action: PayloadAction<User>) => {
-            state.user = action.payload;
-            state.isAuthenticated = true;
+        startDemo: (state, action: PayloadAction<{ userId: string }>) => {
+            state.mode = 'demo';
+            state.userId = action.payload.userId;
+            state.email = null;
+        },
+        signedIn: (state, action: PayloadAction<{ userId: string; email: string | null }>) => {
+            state.mode = 'cloud';
+            state.userId = action.payload.userId;
+            state.email = action.payload.email;
         },
         setOnboarded: (state, action: PayloadAction<boolean>) => {
             state.isOnboarded = action.payload;
         },
-        setToken: (state, action: PayloadAction<string>) => {
-            state.token = action.payload;
-        },
-        setLoading: (state, action: PayloadAction<boolean>) => {
-            state.loading = action.payload;
-        },
-        logout: (state) => {
-            state.user = null;
-            state.isAuthenticated = false;
-            state.token = null;
-        },
+        logout: () => initialState,
     },
 });
 
-export const { setUser, setOnboarded, setToken, setLoading, logout } = authSlice.actions;
+export const { startDemo, signedIn, setOnboarded, logout } = authSlice.actions;
 export default authSlice.reducer;

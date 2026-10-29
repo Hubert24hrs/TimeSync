@@ -1,214 +1,113 @@
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView, Switch, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../src/store/store';
-import { setTheme, setNotifications, setBiometrics, toggleCalendarIntegration } from '../src/store/slices/settingsSlice';
-import { GradientBackground } from '../src/components/atoms/GradientBackground';
-import { HolographicCard } from '../src/components/atoms/HolographicCard';
-import { GlassButton } from '../src/components/atoms/GlassButton';
-import { colors } from '../src/theme/colors';
-import { fontFamilies, fontSizes } from '../src/theme/typography';
-import { spacing, borderRadius } from '../src/theme/spacing';
-import { ThemeMode } from '../src/theme';
-import { useSubscription } from '../src/hooks/useSubscription';
-import { LinearGradient } from 'expo-linear-gradient';
+import Constants from 'expo-constants';
+import React, { useState } from 'react';
+import { View } from 'react-native';
+import { ZonePicker } from '../src/components/ZonePicker';
+import { seedDemoWorkspace, updateProfile } from '../src/data/api';
+import { useMe } from '../src/hooks/useWorkspace';
+import { registerForPush } from '../src/lib/push';
+import { setHaptics, setHour12, setNotifications } from '../src/store/slices/settingsSlice';
+import { useAppDispatch, useAppSelector } from '../src/store/store';
+import { spacing, useTheme, type ThemeMode } from '../src/theme';
+import type { Chronotype } from '../src/types';
+import { Screen } from '../src/ui/Screen';
+import { Button, Card, Chip, Field, ListRow, SectionHeader, Segmented, Txt } from '../src/ui/primitives';
 
-export default function SettingsScreen() {
-    const dispatch = useDispatch();
-    const settings = useSelector((state: RootState) => state.settings);
-    const { tier, isPro, isTrialActive, expiresAt, aiUsageToday, aiDailyLimit } = useSubscription();
-
-    const themeOptions: { label: string; value: ThemeMode; emoji: string }[] = [
-        { label: 'Dark', value: 'dark', emoji: '🌙' },
-        { label: 'Light', value: 'light', emoji: '☀️' },
-        { label: 'Auto', value: 'auto', emoji: '🔄' },
-    ];
+export default function Settings() {
+    const { mode: theme, setMode } = useTheme();
+    const dispatch = useAppDispatch();
+    const me = useMe();
+    const settings = useAppSelector((s) => s.settings);
+    const auth = useAppSelector((s) => s.auth);
+    const consent = useAppSelector((s) => s.ads);
+    const [name, setName] = useState(me?.name ?? '');
+    const [pushNote, setPushNote] = useState<string | null>(null);
+    const [saved, setSaved] = useState(false);
+    if (!me) return null;
 
     return (
-        <GradientBackground>
-            <SafeAreaView style={styles.container} edges={['top']}>
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <Pressable onPress={() => router.back()} hitSlop={12}>
-                            <Text style={styles.backButton}>← Back</Text>
-                        </Pressable>
-                        <Text style={styles.title}>Settings</Text>
-                        <View style={{ width: 60 }} />
-                    </View>
-
-                    {/* Subscription */}
-                    <Text style={styles.sectionTitle}>Subscription</Text>
-                    <Pressable onPress={() => router.push('/paywall')}>
-                        <LinearGradient
-                            colors={isPro
-                                ? [colors.primary.main + '20', colors.secondary.main + '20'] as [string, string]
-                                : [colors.dark.card, colors.dark.elevated] as [string, string]}
-                            style={[styles.subscriptionCard, isPro && styles.subscriptionCardPro]}
-                        >
-                            <View style={styles.settingRow}>
-                                <View>
-                                    <Text style={styles.settingLabel}>
-                                        {isPro ? `⚡ ${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan` : '🔒 Free Plan'}
-                                    </Text>
-                                    <Text style={styles.settingDesc}>
-                                        {isPro
-                                            ? (isTrialActive ? 'Trial active' : 'Premium features unlocked')
-                                            : `${aiUsageToday}/${aiDailyLimit} AI chats used today`}
-                                    </Text>
-                                </View>
-                                <Text style={{ color: colors.primary.light, fontSize: 16 }}>
-                                    {isPro ? 'Manage →' : 'Upgrade →'}
-                                </Text>
-                            </View>
-                        </LinearGradient>
-                    </Pressable>
-
-                    {/* Referral */}
-                    <Pressable onPress={() => router.push('/referral')}>
-                        <HolographicCard style={styles.integrationCard}>
-                            <View style={styles.settingRow}>
-                                <View>
-                                    <Text style={styles.settingLabel}>🎁 Refer & Earn</Text>
-                                    <Text style={styles.settingDesc}>Invite friends, get free Pro access</Text>
-                                </View>
-                                <Text style={{ color: colors.primary.light, fontSize: 16 }}>→</Text>
-                            </View>
-                        </HolographicCard>
-                    </Pressable>
-
-                    {/* Appearance */}
-                    <Text style={styles.sectionTitle}>Appearance</Text>
-                    <HolographicCard>
-                        <Text style={styles.settingLabel}>Theme</Text>
-                        <View style={styles.themeRow}>
-                            {themeOptions.map((opt) => (
-                                <Pressable key={opt.value} onPress={() => dispatch(setTheme(opt.value))}>
-                                    <View style={[styles.themeOption, settings.theme === opt.value && styles.themeOptionActive]}>
-                                        <Text style={styles.themeEmoji}>{opt.emoji}</Text>
-                                        <Text style={[styles.themeLabel, settings.theme === opt.value && styles.themeLabelActive]}>
-                                            {opt.label}
-                                        </Text>
-                                    </View>
-                                </Pressable>
-                            ))}
-                        </View>
-                    </HolographicCard>
-
-                    {/* Notifications */}
-                    <Text style={styles.sectionTitle}>Notifications</Text>
-                    <HolographicCard>
-                        <View style={styles.settingRow}>
-                            <View>
-                                <Text style={styles.settingLabel}>Push Notifications</Text>
-                                <Text style={styles.settingDesc}>Meeting reminders and AI alerts</Text>
-                            </View>
-                            <Switch
-                                value={settings.notificationsEnabled}
-                                onValueChange={(v) => { dispatch(setNotifications(v)); }}
-                                trackColor={{ false: colors.dark.surface, true: colors.primary.main + '60' }}
-                                thumbColor={settings.notificationsEnabled ? colors.primary.main : colors.glass.textMuted}
-                            />
-                        </View>
-                    </HolographicCard>
-
-                    {/* Security */}
-                    <Text style={styles.sectionTitle}>Security</Text>
-                    <HolographicCard>
-                        <View style={styles.settingRow}>
-                            <View>
-                                <Text style={styles.settingLabel}>Biometric Unlock</Text>
-                                <Text style={styles.settingDesc}>Use Face ID or fingerprint</Text>
-                            </View>
-                            <Switch
-                                value={settings.biometricsEnabled}
-                                onValueChange={(v) => { dispatch(setBiometrics(v)); }}
-                                trackColor={{ false: colors.dark.surface, true: colors.secondary.main + '60' }}
-                                thumbColor={settings.biometricsEnabled ? colors.secondary.main : colors.glass.textMuted}
-                            />
-                        </View>
-                    </HolographicCard>
-
-                    {/* Calendar Integrations */}
-                    <Text style={styles.sectionTitle}>Integrations</Text>
-                    {settings.calendarIntegrations.map((integration) => (
-                        <HolographicCard key={integration.provider} style={styles.integrationCard}>
-                            <View style={styles.settingRow}>
-                                <View>
-                                    <Text style={styles.settingLabel}>{integration.provider}</Text>
-                                    <Text style={styles.settingDesc}>
-                                        {integration.connected ? '✅ Connected' : '⚪ Not connected'}
-                                    </Text>
-                                </View>
-                                <GlassButton
-                                    title={integration.connected ? 'Disconnect' : 'Connect'}
-                                    onPress={() => dispatch(toggleCalendarIntegration(integration.provider))}
-                                    variant={integration.connected ? 'ghost' : 'primary'}
-                                    size="sm"
-                                />
-                            </View>
-                        </HolographicCard>
+        <Screen title="Settings" back maxWidth={720}>
+            <SectionHeader title="Profile" style={{ marginTop: 0 }} />
+            <View style={{ gap: spacing.md }}>
+                <Field label="Name" value={name} onChangeText={setName} maxLength={120} />
+                <ZonePicker value={me.timezone} onChange={(timezone) => updateProfile({ timezone })} />
+                <Txt variant="label" tone="secondary">
+                    Chronotype
+                </Txt>
+                <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' }}>
+                    {(['lion', 'bear', 'wolf', 'dolphin'] as Chronotype[]).map((ct) => (
+                        <Chip key={ct} label={ct} selected={me.chronotype === ct} onPress={() => updateProfile({ chronotype: ct })} />
                     ))}
+                </View>
+                <Txt variant="label" tone="secondary">
+                    Working hours start
+                </Txt>
+                <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' }}>
+                    {[7, 8, 9, 10, 11].map((h) => (
+                        <Chip key={h} label={`${h}:00–${h + 8}:00`} selected={me.workingHours.start === h} onPress={() => updateProfile({ workingHours: { start: h, end: h + 8 } })} />
+                    ))}
+                </View>
+                <Button
+                    title={saved ? 'Saved' : 'Save name'}
+                    size="sm"
+                    disabled={name.trim() === me.name || !name.trim()}
+                    onPress={async () => {
+                        await updateProfile({ name: name.trim() });
+                        setSaved(true);
+                    }}
+                />
+            </View>
 
-                    {/* About */}
-                    <Text style={styles.sectionTitle}>About</Text>
-                    <HolographicCard>
-                        <View style={styles.aboutRow}>
-                            <Text style={styles.aboutLabel}>Version</Text>
-                            <Text style={styles.aboutValue}>1.0.0</Text>
-                        </View>
-                        <View style={styles.aboutRow}>
-                            <Text style={styles.aboutLabel}>Build</Text>
-                            <Text style={styles.aboutValue}>2026.02.26</Text>
-                        </View>
-                    </HolographicCard>
+            <SectionHeader title="Appearance" />
+            <Segmented<ThemeMode>
+                value={theme}
+                onChange={setMode}
+                options={[
+                    { value: 'dark', label: 'Dark' },
+                    { value: 'light', label: 'Light' },
+                    { value: 'auto', label: 'System' },
+                ]}
+            />
+            <Card style={{ paddingVertical: 0, marginTop: spacing.md }}>
+                <ListRow icon="time-outline" title="12-hour clock" toggle={settings.hour12} onToggle={(v) => dispatch(setHour12(v))} />
+                <ListRow icon="pulse-outline" title="Haptics" toggle={settings.hapticsEnabled} onToggle={(v) => dispatch(setHaptics(v))} last />
+            </Card>
 
-                    {/* Privacy */}
-                    <Text style={styles.sectionTitle}>Privacy</Text>
-                    <HolographicCard>
-                        <Pressable style={styles.aboutRow}>
-                            <Text style={styles.aboutLabel}>Privacy Policy</Text>
-                            <Text style={{ color: colors.primary.light }}>→</Text>
-                        </Pressable>
-                        <Pressable style={styles.aboutRow}>
-                            <Text style={styles.aboutLabel}>Terms of Service</Text>
-                            <Text style={{ color: colors.primary.light }}>→</Text>
-                        </Pressable>
-                        <Pressable style={styles.aboutRow}>
-                            <Text style={styles.aboutLabel}>Manage Data & Consent</Text>
-                            <Text style={{ color: colors.primary.light }}>→</Text>
-                        </Pressable>
-                    </HolographicCard>
+            <SectionHeader title="Notifications" />
+            <Card style={{ paddingVertical: 0 }}>
+                <ListRow
+                    icon="notifications-outline"
+                    title="Booking reminders"
+                    subtitle="Email 24h and 1h before; push on mobile; follow-up after"
+                    toggle={settings.notificationsEnabled}
+                    onToggle={async (v) => {
+                        dispatch(setNotifications(v));
+                        if (v && auth.mode === 'cloud' && auth.userId) setPushNote((await registerForPush(auth.userId)).message);
+                    }}
+                    last
+                />
+            </Card>
+            {pushNote ? (
+                <Txt variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
+                    {pushNote}
+                </Txt>
+            ) : null}
 
-                    <View style={{ height: spacing.huge }} />
-                </ScrollView>
-            </SafeAreaView>
-        </GradientBackground>
+            <SectionHeader title="Privacy" />
+            <Card style={{ paddingVertical: 0 }}>
+                <ListRow icon="analytics-outline" title="Analytics" value={consent.analyticsConsent ? 'Allowed' : 'Off'} />
+                <ListRow icon="megaphone-outline" title="Personalised ads" value={consent.personalizedAdsConsent ? 'Allowed' : 'Off'} last />
+            </Card>
+
+            {auth.mode === 'demo' ? (
+                <>
+                    <SectionHeader title="Demo" />
+                    <Button title="Reset demo data" variant="secondary" icon="refresh" onPress={() => seedDemoWorkspace(me.timezone)} />
+                </>
+            ) : null}
+
+            <Txt variant="caption" tone="muted" style={{ textAlign: 'center', marginTop: spacing.xxl }}>
+                TimeSync {Constants.expoConfig?.version ?? ''} · {auth.mode === 'cloud' ? auth.email : 'demo mode'}
+            </Txt>
+        </Screen>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1 },
-    scrollContent: { padding: spacing.lg },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xl },
-    backButton: { fontFamily: fontFamilies.primaryMedium, fontSize: fontSizes.lg, color: colors.primary.light },
-    title: { fontFamily: fontFamilies.displayBold, fontSize: fontSizes.xxl, color: '#FFF' },
-    sectionTitle: { fontFamily: fontFamilies.primarySemiBold, fontSize: fontSizes.md, color: colors.glass.textMuted, textTransform: 'uppercase', letterSpacing: 1, marginTop: spacing.xl, marginBottom: spacing.md },
-    settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    settingLabel: { fontFamily: fontFamilies.primarySemiBold, fontSize: fontSizes.lg, color: '#FFF', marginBottom: 2 },
-    settingDesc: { fontFamily: fontFamilies.primary, fontSize: fontSizes.sm, color: colors.glass.textMuted },
-    themeRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.md },
-    themeOption: { alignItems: 'center', paddingVertical: spacing.md, paddingHorizontal: spacing.xl, borderRadius: borderRadius.lg, borderWidth: 1.5, borderColor: colors.glass.border, backgroundColor: colors.dark.surface },
-    themeOptionActive: { borderColor: colors.primary.main, backgroundColor: colors.primary.main + '15' },
-    themeEmoji: { fontSize: 24, marginBottom: spacing.xs },
-    themeLabel: { fontFamily: fontFamilies.primaryMedium, fontSize: fontSizes.sm, color: colors.glass.textMuted },
-    themeLabelActive: { color: colors.primary.light },
-    integrationCard: { marginBottom: spacing.sm },
-    subscriptionCard: { borderRadius: borderRadius.xl, padding: spacing.xl, borderWidth: 1.5, borderColor: colors.glass.border, marginBottom: spacing.sm },
-    subscriptionCardPro: { borderColor: colors.primary.main },
-    aboutRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.sm },
-    aboutLabel: { fontFamily: fontFamilies.primary, fontSize: fontSizes.md, color: colors.glass.textMuted },
-    aboutValue: { fontFamily: fontFamilies.mono, fontSize: fontSizes.md, color: '#FFF' },
-});

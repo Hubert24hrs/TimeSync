@@ -27,12 +27,17 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "single",
+      "name": "TimeSync",
+      "themeColor": "#0F0F1E",
+      "backgroundColor": "#0F0F1E"
     },
     "plugins": [
       "expo-router",
       "expo-font",
-      "expo-localization"
+      "expo-sharing",
+      "expo-web-browser"
     ]
   }
 }
