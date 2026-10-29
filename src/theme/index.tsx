@@ -1,87 +1,39 @@
-import React, { createContext, useContext, useState, useMemo, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
-import { colors } from './colors';
-import { typography, fontFamilies, fontSizes, lineHeights } from './typography';
-import { spacing, borderRadius, iconSizes, hitSlop } from './spacing';
-import { shadows } from './shadows';
-import { springConfigs, timingConfigs, animationDelays } from './animations';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '../store/store';
+import { setTheme } from '../store/slices/settingsSlice';
+import { darkColors, lightColors, type ThemeColors } from './tokens';
 
-export { colors, typography, fontFamilies, fontSizes, lineHeights, spacing, borderRadius, iconSizes, hitSlop, shadows, springConfigs, timingConfigs, animationDelays };
+export * from './tokens';
+export * from './typography';
+export * from './spacing';
 
 export type ThemeMode = 'dark' | 'light' | 'auto';
 
-interface ThemeColors {
-    bg: string;
-    card: string;
-    elevated: string;
-    surface: string;
-    border: string;
-    text: string;
-    textSecondary: string;
-    textMuted: string;
-    primary: string;
-    primaryLight: string;
-}
-
-interface ThemeContextType {
+interface ThemeContextValue {
     mode: ThemeMode;
     isDark: boolean;
-    themeColors: ThemeColors;
+    c: ThemeColors;
     setMode: (mode: ThemeMode) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const darkThemeColors: ThemeColors = {
-    bg: colors.dark.bg,
-    card: colors.dark.card,
-    elevated: colors.dark.elevated,
-    surface: colors.dark.surface,
-    border: colors.dark.border,
-    text: '#FFFFFF',
-    textSecondary: 'rgba(255, 255, 255, 0.75)',
-    textMuted: 'rgba(255, 255, 255, 0.5)',
-    primary: colors.primary.main,
-    primaryLight: colors.primary.light,
-};
-
-const lightThemeColors: ThemeColors = {
-    bg: colors.light.bg,
-    card: colors.light.card,
-    elevated: colors.light.elevated,
-    surface: colors.light.surface,
-    border: colors.light.border,
-    text: '#1A1A2E',
-    textSecondary: 'rgba(26, 26, 46, 0.75)',
-    textMuted: 'rgba(26, 26, 46, 0.5)',
-    primary: colors.primary.main,
-    primaryLight: colors.primary.light,
-};
-
-interface ThemeProviderProps {
-    children: ReactNode;
+export function ThemeProvider({ children }: { children: ReactNode }) {
+    const system = useColorScheme();
+    const mode = useSelector((s: RootState) => s.settings.theme);
+    const dispatch = useDispatch<AppDispatch>();
+    const isDark = mode === 'auto' ? system !== 'light' : mode === 'dark';
+    const value = useMemo<ThemeContextValue>(
+        () => ({ mode, isDark, c: isDark ? darkColors : lightColors, setMode: (m) => dispatch(setTheme(m)) }),
+        [mode, isDark, dispatch],
+    );
+    return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
-    const systemScheme = useColorScheme();
-    const [mode, setMode] = useState<ThemeMode>('dark');
-
-    const isDark = useMemo(() => {
-        if (mode === 'auto') return systemScheme === 'dark';
-        return mode === 'dark';
-    }, [mode, systemScheme]);
-
-    const themeColors = useMemo(() => (isDark ? darkThemeColors : lightThemeColors), [isDark]);
-
-    const value = useMemo(() => ({ mode, isDark, themeColors, setMode }), [mode, isDark, themeColors]);
-
-    return <ThemeContext.Provider value={ value }> { children } </ThemeContext.Provider>;
-}
-
-export function useTheme(): ThemeContextType {
-    const context = useContext(ThemeContext);
-    if (!context) {
-        throw new Error('useTheme must be used within a ThemeProvider');
-    }
-    return context;
+export function useTheme(): ThemeContextValue {
+    const ctx = useContext(ThemeContext);
+    if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
+    return ctx;
 }

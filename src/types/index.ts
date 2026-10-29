@@ -1,163 +1,79 @@
-export type Chronotype = 'lion' | 'bear' | 'wolf' | 'dolphin';
-export type MeetingStatus = 'confirmed' | 'tentative' | 'cancelled' | 'pending';
-export type MemberStatus = 'online' | 'offline' | 'busy' | 'away';
-export type EnergySource = 'manual' | 'predicted' | 'wearable';
-export type ViewMode = 'day' | 'week' | 'month';
+import type { Booking, Chronotype, EventType, AvailabilitySchedule, RoutingForm, VoteAnswer } from '../engine';
 
-// Monetization types
+export type { Booking, Chronotype, EventType, AvailabilitySchedule, VoteAnswer };
+
 export type SubscriptionTier = 'free' | 'pro' | 'teams';
-export type BillingPeriod = 'monthly' | 'annual' | 'lifetime';
-export type SubscriptionStatus = 'active' | 'trialing' | 'expired' | 'cancelled' | 'paused';
+export type BillingPeriod = 'monthly' | 'annual';
+export type SubscriptionStatus = 'active' | 'trialing' | 'expired' | 'cancelled';
+export type MemberStatus = 'online' | 'away' | 'offline';
+
+export interface Profile {
+    id: string;
+    username: string;
+    name: string;
+    email: string;
+    timezone: string;
+    chronotype: Chronotype;
+    countryCode?: string;
+    workingHours: { start: number; end: number };
+    role?: string;
+    latitude?: number;
+    longitude?: number;
+    status?: MemberStatus;
+}
+
+export interface Poll {
+    id: string;
+    title: string;
+    durationMinutes: number;
+    status: 'open' | 'closed' | 'booked';
+    participantIds: string[];
+    options: { id: string; start: string; end: string }[];
+    votes: { voterId: string; optionId: string; answer: VoteAnswer }[];
+    winnerOptionId?: string;
+    createdAt: string;
+}
+
+export interface RoutingFormRecord {
+    id: string;
+    slug: string;
+    title: string;
+    questions: { id: string; label: string; options: string[] }[];
+    form: RoutingForm;
+}
+
+export interface Webhook {
+    id: string;
+    url: string;
+    events: string[];
+    active: boolean;
+}
+
+export interface CalendarConnection {
+    id: string;
+    provider: 'google' | 'outlook';
+    email: string;
+    lastSyncedAt?: string;
+}
 
 export interface SubscriptionPlan {
     id: string;
-    tier: SubscriptionTier;
+    tier: Exclude<SubscriptionTier, 'free'>;
     period: BillingPeriod;
     price: number;
     currency: string;
     trialDays: number;
     features: string[];
-    badge?: string;
     popular?: boolean;
 }
 
-export interface Entitlement {
-    id: string;
-    isActive: boolean;
-    expiresAt: string | null;
-    productId: string;
-    store: 'apple' | 'google' | 'stripe' | 'promotional';
-}
-
-export interface ReferralInfo {
-    code: string;
-    referrerId: string;
-    totalReferrals: number;
-    pendingRewards: number;
-    claimedRewards: number;
-}
-
-export interface AdConfig {
-    bannerEnabled: boolean;
-    interstitialEnabled: boolean;
-    rewardedEnabled: boolean;
-    interstitialFrequency: number;
-    bannerUnitId: string;
-    interstitialUnitId: string;
-    rewardedUnitId: string;
-}
-
-export interface AnalyticsEvent {
-    name: string;
-    params: Record<string, string | number | boolean>;
-    timestamp: string;
-}
-
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-    timezone: string;
-    chronotype: Chronotype;
-    avatar?: string;
-    energyProfile?: number[];
-    preferences?: UserPreferences;
-}
-
-export interface UserPreferences {
-    theme: 'dark' | 'light' | 'auto';
-    language: string;
-    notificationsEnabled: boolean;
-    biometricsEnabled: boolean;
-    focusTimeEnabled: boolean;
-    culturalCalendars: string[];
-}
-
-export interface CalendarEvent {
-    id: string;
-    title: string;
-    description?: string;
-    startTime: string;
-    endTime: string;
-    timezone: string;
-    attendees: Attendee[];
-    energyCost: number;
-    status: MeetingStatus;
-    location?: string;
-    meetingLink?: string;
-    color?: string;
-    isRecurring?: boolean;
-}
-
-export interface Attendee {
-    id: string;
-    name: string;
-    email: string;
-    avatar?: string;
-    status: 'accepted' | 'declined' | 'pending';
-}
-
-export interface TeamMember extends User {
-    status: MemberStatus;
-    localTime: string;
-    role: string;
-    latitude?: number;
-    longitude?: number;
-}
-
-export interface EnergyLevel {
-    timestamp: string;
-    level: number;
-    context?: string;
-    source: EnergySource;
-}
-
-export interface EnergyForecast {
-    date: string;
-    hourly: { hour: number; level: number }[];
-    peakHours: number[];
-    lowHours: number[];
-    averageLevel: number;
-}
-
-export interface CulturalHoliday {
-    id: string;
-    name: string;
-    date: string;
-    religion?: string;
-    country: string;
-    description: string;
-    observanceLevel: 'major' | 'minor' | 'optional';
-    emoji?: string;
-}
-
-export interface ScheduleSuggestion {
-    id: string;
-    startTime: string;
-    endTime: string;
-    fairnessScore: number;
-    energyScore: number;
-    timezone: string;
+export interface SlotSuggestion {
+    start: string;
+    end: string;
+    fairness: number;
+    energy: number;
     pros: string[];
     cons: string[];
-    confidence: number;
-}
-
-export interface ChronotypeResult {
-    type: Chronotype;
-    confidence: number;
-    peakHours: number[];
-    description: string;
-    emoji: string;
-    color: string;
-}
-
-export interface MeetingConflict {
-    id: string;
-    event1: CalendarEvent;
-    event2: CalendarEvent;
-    severity: 'hard' | 'soft';
-    suggestion?: ScheduleSuggestion;
 }
 
 export interface ChatMessage {
@@ -165,24 +81,6 @@ export interface ChatMessage {
     text: string;
     sender: 'user' | 'ai';
     timestamp: string;
-    suggestions?: ScheduleSuggestion[];
+    suggestions?: SlotSuggestion[];
     quickReplies?: string[];
-}
-
-export interface NotificationItem {
-    id: string;
-    type: 'meeting' | 'conflict' | 'energy' | 'cultural' | 'system';
-    title: string;
-    message: string;
-    timestamp: string;
-    read: boolean;
-    actionUrl?: string;
-}
-
-export interface OnboardingSlide {
-    id: string;
-    title: string;
-    description: string;
-    icon: string;
-    gradient: readonly [string, string];
 }

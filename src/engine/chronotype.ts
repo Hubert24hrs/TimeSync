@@ -39,3 +39,18 @@ export function energyLabel(level: number): 'Peak' | 'High' | 'Medium' | 'Low' {
     if (level >= 4) return 'Medium';
     return 'Low';
 }
+
+/** Peak hours as contiguous local windows, e.g. dolphin → [[10, 12], [15, 17]]. */
+export function peakWindows(chronotype: Chronotype | undefined): [number, number][] {
+    const out: [number, number][] = [];
+    for (const h of peakHours(chronotype)) {
+        const last = out[out.length - 1];
+        if (last && last[1] === h) last[1] = h + 1;
+        else out.push([h, h + 1]);
+    }
+    return out;
+}
+
+export function formatPeakWindows(chronotype: Chronotype | undefined): string {
+    return peakWindows(chronotype).map(([a, b]) => `${a}:00–${b}:00`).join(', ');
+}

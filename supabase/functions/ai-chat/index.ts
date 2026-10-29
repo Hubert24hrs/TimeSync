@@ -6,7 +6,8 @@ import { assistantFacts, assistantReply, chatRequestSchema, type AssistantContex
 import { HttpError, handler, json, rateLimit, readJson, requireUser, serviceClient } from '../_shared/http.ts';
 
 const MODEL = 'claude-opus-5-5';
-const DAILY_LIMIT: Record<string, number> = { free: 5, pro: 200, teams: 400 };
+// The AI model is a Pro/Team feature; Free gets the deterministic engine assistant (no provider cost).
+const DAILY_LIMIT: Record<string, number> = { free: 200, pro: 200, teams: 400 };
 
 const SYSTEM = `You are TimeSync's scheduling assistant for globally distributed teams.
 Answer in at most 120 words, warm and direct, using plain text with short bullet lists when listing times.
@@ -66,7 +67,7 @@ Deno.serve(
         const local = assistantReply(message, ctx);
         const suggestions = local.suggestions.map((s) => ({ start: new Date(s.start).toISOString(), end: new Date(s.end).toISOString(), fairness: s.fairnessScore, energy: s.energyScore, pros: s.pros, cons: s.cons }));
 
-        if (!Deno.env.get('ANTHROPIC_API_KEY')) {
+        if (!Deno.env.get('ANTHROPIC_API_KEY') || profile.tier === 'free') {
             return json({ text: local.text, suggestions, quickReplies: local.quickReplies, source: 'engine' });
         }
 

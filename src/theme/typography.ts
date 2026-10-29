@@ -9,84 +9,16 @@ export const fontFamilies = {
     monoBold: 'JetBrainsMono_700Bold',
 } as const;
 
-export const fontSizes = {
-    xs: 10,
-    sm: 12,
-    md: 14,
-    lg: 16,
-    xl: 18,
-    xxl: 22,
-    xxxl: 28,
-    display: 36,
-    hero: 48,
-} as const;
-
-export const lineHeights = {
-    xs: 14,
-    sm: 16,
-    md: 20,
-    lg: 24,
-    xl: 28,
-    xxl: 32,
-    xxxl: 38,
-    display: 44,
-    hero: 58,
-} as const;
-
-export const typography = {
-    h1: {
-        fontFamily: fontFamilies.displayBold,
-        fontSize: fontSizes.hero,
-        lineHeight: lineHeights.hero,
-    },
-    h2: {
-        fontFamily: fontFamilies.displayBold,
-        fontSize: fontSizes.display,
-        lineHeight: lineHeights.display,
-    },
-    h3: {
-        fontFamily: fontFamilies.display,
-        fontSize: fontSizes.xxxl,
-        lineHeight: lineHeights.xxxl,
-    },
-    h4: {
-        fontFamily: fontFamilies.primaryBold,
-        fontSize: fontSizes.xxl,
-        lineHeight: lineHeights.xxl,
-    },
-    body: {
-        fontFamily: fontFamilies.primary,
-        fontSize: fontSizes.lg,
-        lineHeight: lineHeights.lg,
-    },
-    bodyMedium: {
-        fontFamily: fontFamilies.primaryMedium,
-        fontSize: fontSizes.lg,
-        lineHeight: lineHeights.lg,
-    },
-    caption: {
-        fontFamily: fontFamilies.primary,
-        fontSize: fontSizes.sm,
-        lineHeight: lineHeights.sm,
-    },
-    label: {
-        fontFamily: fontFamilies.primarySemiBold,
-        fontSize: fontSizes.md,
-        lineHeight: lineHeights.md,
-    },
-    time: {
-        fontFamily: fontFamilies.mono,
-        fontSize: fontSizes.xxl,
-        lineHeight: lineHeights.xxl,
-    },
-    timeLarge: {
-        fontFamily: fontFamilies.monoBold,
-        fontSize: fontSizes.display,
-        lineHeight: lineHeights.display,
-    },
-    button: {
-        fontFamily: fontFamilies.primarySemiBold,
-        fontSize: fontSizes.lg,
-        lineHeight: lineHeights.lg,
-    },
+export const type = {
+    display: { fontFamily: fontFamilies.displayBold, fontSize: 34, lineHeight: 40, letterSpacing: -0.8 },
+    h1: { fontFamily: fontFamilies.displayBold, fontSize: 28, lineHeight: 34, letterSpacing: -0.5 },
+    h2: { fontFamily: fontFamilies.displayBold, fontSize: 22, lineHeight: 28, letterSpacing: -0.3 },
+    h3: { fontFamily: fontFamilies.display, fontSize: 18, lineHeight: 24 },
+    body: { fontFamily: fontFamilies.primary, fontSize: 15, lineHeight: 22 },
+    bodyStrong: { fontFamily: fontFamilies.primarySemiBold, fontSize: 15, lineHeight: 22 },
+    label: { fontFamily: fontFamilies.primarySemiBold, fontSize: 13, lineHeight: 18 },
+    caption: { fontFamily: fontFamilies.primary, fontSize: 12, lineHeight: 16 },
+    overline: { fontFamily: fontFamilies.primarySemiBold, fontSize: 11, lineHeight: 14, letterSpacing: 1, textTransform: 'uppercase' as const },
+    clock: { fontFamily: fontFamilies.monoBold, fontSize: 28, lineHeight: 34, letterSpacing: -0.5 },
+    mono: { fontFamily: fontFamilies.mono, fontSize: 13, lineHeight: 18 },
 } as const;

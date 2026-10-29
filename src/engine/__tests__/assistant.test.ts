@@ -1,4 +1,5 @@
 import { assistantFacts, assistantReply, type AssistantContext } from '../assistant';
+import { formatPeakWindows, peakWindows } from '../chronotype';
 
 const now = Date.parse('2026-11-02T12:00:00Z'); // Monday
 const ctx: AssistantContext = {
@@ -38,5 +39,12 @@ describe('assistantReply', () => {
         expect(f.conflicts).toHaveLength(1);
         expect(f.suggestedSlots.length).toBeGreaterThan(0);
         expect(f.team).toHaveLength(2);
+    });
+});
+
+describe('peak windows', () => {
+    it('splits non-contiguous peaks', () => {
+        expect(peakWindows('dolphin')).toEqual([[10, 12], [15, 17]]);
+        expect(formatPeakWindows('lion')).toBe('7:00–12:00');
     });
 });

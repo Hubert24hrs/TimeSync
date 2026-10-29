@@ -1,19 +1,12 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ChatMessage, ScheduleSuggestion, ChronotypeResult } from '../../types';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { ChatMessage } from '../../types';
 
 interface AIState {
     chatMessages: ChatMessage[];
     isThinking: boolean;
-    suggestions: ScheduleSuggestion[];
-    chronotypeResult: ChronotypeResult | null;
 }
 
-const initialState: AIState = {
-    chatMessages: [],
-    isThinking: false,
-    suggestions: [],
-    chronotypeResult: null,
-};
+const initialState: AIState = { chatMessages: [], isThinking: false };
 
 const aiSlice = createSlice({
     name: 'ai',
@@ -22,20 +15,14 @@ const aiSlice = createSlice({
         addMessage: (state, action: PayloadAction<ChatMessage>) => {
             state.chatMessages.push(action.payload);
         },
-        setMessages: (state, action: PayloadAction<ChatMessage[]>) => {
-            state.chatMessages = action.payload;
+        clearChat: (state) => {
+            state.chatMessages = [];
         },
         setIsThinking: (state, action: PayloadAction<boolean>) => {
             state.isThinking = action.payload;
         },
-        setSuggestions: (state, action: PayloadAction<ScheduleSuggestion[]>) => {
-            state.suggestions = action.payload;
-        },
-        setChronotypeResult: (state, action: PayloadAction<ChronotypeResult>) => {
-            state.chronotypeResult = action.payload;
-        },
     },
 });
 
-export const { addMessage, setMessages, setIsThinking, setSuggestions, setChronotypeResult } = aiSlice.actions;
+export const { addMessage, clearChat, setIsThinking } = aiSlice.actions;
 export default aiSlice.reducer;

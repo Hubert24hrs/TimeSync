@@ -8,6 +8,8 @@ create extension if not exists btree_gist;
 create table public.profiles (
     id uuid primary key references auth.users (id) on delete cascade,
     username text unique not null check (username ~ '^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?$'),
+    -- Top-level app routes can't be usernames (timesync.app/<user>/<event> shares the URL space).
+    constraint username_not_reserved check (username not in ('welcome', 'onboarding', 'booking', 'poll', 'event-type', 'new-meeting', 'availability', 'analytics', 'integrations', 'routing', 'settings', 'paywall', 'referral', 'cultural-calendar', 'schedule', 'team', 'assistant', 'profile', 'api', 'auth-callback')),
     display_name text not null default '',
     avatar_url text,
     timezone text not null default 'UTC',
@@ -268,7 +270,7 @@ declare base text; candidate text; n int := 0;
 begin
     base := lower(regexp_replace(coalesce(split_part(new.email, '@', 1), 'user'), '[^a-z0-9]+', '-', 'g'));
     base := trim(both '-' from left(base, 30));
-    if char_length(base) < 3 then base := 'user-' || base; end if;
+    if char_length(base) < 3 or base in ('welcome', 'onboarding', 'booking', 'poll', 'event-type', 'new-meeting', 'availability', 'analytics', 'integrations', 'routing', 'settings', 'paywall', 'referral', 'cultural-calendar', 'schedule', 'team', 'assistant', 'profile', 'api', 'auth-callback') then base := 'user-' || base; end if;
     candidate := base;
     while exists (select 1 from profiles where username = candidate) loop
         n := n + 1;

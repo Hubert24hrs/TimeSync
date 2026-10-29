@@ -11,7 +11,8 @@
     "lint": "expo lint",
     "test": "jest",
     "export:web": "expo export --platform web",
-    "typecheck:functions": "tsc -p supabase/functions/tsconfig.json"
+    "typecheck:functions": "tsc -p supabase/functions/tsconfig.json",
+    "serve:web": "node scripts/serve-web.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -23,9 +24,7 @@
     "@reduxjs/toolkit": "^2.11.2",
     "@supabase/supabase-js": "^2.118.0",
     "@tanstack/react-query": "^5.105.0",
-    "date-fns": "^4.1.0",
     "expo": "~55.0.32",
-    "expo-auth-session": "~55.0.19",
     "expo-blur": "~55.0.18",
     "expo-clipboard": "~55.0.17",
     "expo-constants": "^55.0.7",
@@ -35,10 +34,8 @@
     "expo-haptics": "~55.0.18",
     "expo-linear-gradient": "~55.0.18",
     "expo-linking": "^55.0.7",
-    "expo-localization": "~55.0.19",
     "expo-notifications": "~55.0.27",
     "expo-router": "~55.0.18",
-    "expo-secure-store": "~55.0.18",
     "expo-sharing": "~55.0.25",
     "expo-status-bar": "~55.0.6",
     "expo-web-browser": "~55.0.20",

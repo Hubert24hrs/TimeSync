@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { energyAt, peakHours } from './chronotype.ts';
+import { energyAt, formatPeakWindows, peakHours } from './chronotype.ts';
 import { holidaysBetween } from './culture.ts';
 import { findOptimalSlots, type SlotScore } from './optimizer.ts';
 import { cityFromZone, nextDstTransition, overlaps } from './time.ts';
@@ -78,10 +78,9 @@ export function assistantReply(message: string, ctx: AssistantContext): Assistan
         };
     }
     if (/energy|peak|tired|productive|chronotype/.test(q)) {
-        const peaks = peakHours(ctx.user.chronotype);
         const hour = DateTime.fromMillis(ctx.now, { zone }).hour;
         const now = Math.round(energyAt(ctx.user.chronotype, hour));
-        const range = peaks.length ? `${peaks[0]}:00–${peaks[peaks.length - 1] + 1}:00` : 'mid-morning';
+        const range = formatPeakWindows(ctx.user.chronotype) || 'mid-morning';
         return { text: `As a ${ctx.user.chronotype ?? 'bear'}, your peak focus is ${range} local time. Right now you are around ${now}/10. Put deep work and hard conversations in your peak; keep admin for the dips.`, suggestions: [], quickReplies: QUICK };
     }
     if (/conflict|overlap|double/.test(q)) {
