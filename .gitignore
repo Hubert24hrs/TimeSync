@@ -26,9 +26,16 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# local env files (keep the examples)
 .env
+.env.*
+!.env.example
+supabase/.env
+!supabase/.env.example
+supabase/.temp/
+
+# test output
+coverage/
 
 # typescript
 *.tsbuildinfo
@@ -38,3 +45,6 @@ yarn-error.*
 .vscode/
 *.swp
 *.swo
+
+# generated
+expo-env.d.ts
